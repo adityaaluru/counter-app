@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import _ from "lodash";
+import PropTypes from "prop-types";
 
 class Pagination extends Component {
   checkIfActive(selectedPage, page) {
@@ -34,5 +35,12 @@ class Pagination extends Component {
     );
   }
 }
+
+Pagination.propTypes = {
+  totalCount: PropTypes.number.isRequired,
+  pageSize: PropTypes.number.isRequired,
+  selectedPage: PropTypes.number.isRequired,
+  onSelect: PropTypes.func.isRequired,
+};
 
 export default Pagination;

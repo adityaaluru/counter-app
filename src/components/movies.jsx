@@ -1,16 +1,29 @@
 import React, { Component } from "react";
 
-import Likes from "./likes";
+import MoviesTable from "./moviesTable";
 import Pagination from "./pagination";
+import ListGroup from "./listgroup";
 import { getMovies } from "../services/fakeMovieService";
+import { getGenres } from "../services/fakeGenreService";
 import { getItemsInPage } from "../utils/pagination";
 
 class Movies extends Component {
   state = {
-    movies: getMovies(),
-    pageSize: 3,
+    movies: [],
+    pageSize: 4,
     selectedPage: 1,
+    selectedGenre: "all",
+    genres: [],
   };
+
+  // Lifecycle methods
+
+  componentDidMount() {
+    const genres = [{ _id: "all", name: "All Genres" }, ...getGenres()];
+    this.setState({ movies: getMovies(), genres });
+  }
+
+  // Event handlers
 
   handleDelete = (movie) => {
     const movies = this.state.movies.filter((m) => m._id !== movie._id);
@@ -32,12 +45,32 @@ class Movies extends Component {
     this.setState({ selectedPage: pageId });
   };
 
+  handleSelectGenre = (genreId) => {
+    this.setState({ selectedGenre: genreId, selectedPage: 1 });
+  };
+
+  filterMovies = (movies, genreId) => {
+    if (genreId === "all") {
+      return movies;
+    } else {
+      const filteredMovies = movies.filter(
+        (movie) => movie.genre._id === genreId
+      );
+      return filteredMovies;
+    }
+  };
+
   render() {
-    const count = this.state.movies.length;
-    const moviesToShow = getItemsInPage(
+    const filteredMovies = this.filterMovies(
       this.state.movies,
+      this.state.selectedGenre
+    );
+    const count = filteredMovies.length;
+    let selectedPage = this.state.selectedPage;
+    const moviesToShow = getItemsInPage(
+      filteredMovies,
       this.state.pageSize,
-      this.state.selectedPage
+      selectedPage
     );
 
     if (count === 0) {
@@ -45,50 +78,29 @@ class Movies extends Component {
     }
     return (
       <React.Fragment>
-        <p>Currently showing {count} movies from the database</p>
-        <table className="table">
-          <thead>
-            <tr>
-              <th scope="col">Title</th>
-              <th scope="col">Genre</th>
-              <th scope="col">Stock</th>
-              <th scope="col">Rate</th>
-              <th scope="col"></th>
-              <th scope="col"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {moviesToShow.map((item) => (
-              <tr key={item._id}>
-                <td>{item.title}</td>
-                <td>{item.genre.name}</td>
-                <td>{item.numberInStock}</td>
-                <td>{item.dailyRentalRate}</td>
-                <td>
-                  <Likes
-                    id={item._id}
-                    likeState={item.handleLike}
-                    onLiked={this.handleLike}
-                  />
-                </td>
-                <td>
-                  <button
-                    onClick={() => this.handleDelete(item)}
-                    className="btn btn-danger btn-sm"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <Pagination
-          totalCount={count}
-          pageSize={this.state.pageSize}
-          onSelect={this.handlePageChange}
-          selectedPage={this.state.selectedPage}
-        />
+        <div className="row">
+          <div className="col-2">
+            <ListGroup
+              allGenres={this.state.genres}
+              onSelectGenre={this.handleSelectGenre}
+              selectedGenre={this.state.selectedGenre}
+            />
+          </div>
+          <div className="col">
+            <p>Currently showing {count} movies from the database</p>
+            <MoviesTable
+              moviesToShow={moviesToShow}
+              onDelete={this.handleDelete}
+              onLike={this.handleLike}
+            />
+            <Pagination
+              totalCount={count}
+              pageSize={this.state.pageSize}
+              onSelect={this.handlePageChange}
+              selectedPage={selectedPage}
+            />
+          </div>
+        </div>
       </React.Fragment>
     );
   }
