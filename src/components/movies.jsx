@@ -3,7 +3,11 @@ import React, { Component } from "react";
 import MoviesTable from "./moviesTable";
 import Pagination from "./pagination";
 import ListGroup from "./listgroup";
-import { getMovies } from "../services/fakeMovieService";
+import {
+  deleteMovie,
+  getMovies,
+  saveMovie,
+} from "../services/fakeMovieService";
 import { getGenres } from "../services/fakeGenreService";
 import { getItemsInPage } from "../utils/pagination";
 
@@ -26,19 +30,18 @@ class Movies extends Component {
   // Event handlers
 
   handleDelete = (movie) => {
-    const movies = this.state.movies.filter((m) => m._id !== movie._id);
-    this.setState({ movies });
+    deleteMovie(movie._id);
+    this.setState({ movies: getMovies() });
   };
 
   handleLike = (movieID) => {
-    const movies = this.state.movies.map((m) => {
-      if (m._id === movieID) {
-        if (m.handleLike) m.handleLike = false;
-        else m.handleLike = true;
-      }
-      return m;
-    });
-    this.setState({ movies });
+    const movie = this.state.movies.find((m) => m._id === movieID);
+
+    if (movie.likedState) movie.likedState = false;
+    else movie.likedState = true;
+    saveMovie(movie);
+
+    this.setState({ movies: getMovies() });
   };
 
   handlePageChange = (pageId) => {
@@ -47,6 +50,10 @@ class Movies extends Component {
 
   handleSelectGenre = (genreId) => {
     this.setState({ selectedGenre: genreId, selectedPage: 1 });
+  };
+
+  handleNewMovie = () => {
+    this.props.history.push("/movies/new");
   };
 
   filterMovies = (movies, genreId) => {
@@ -87,6 +94,9 @@ class Movies extends Component {
             />
           </div>
           <div className="col">
+            <button className="btn btn-primary" onClick={this.handleNewMovie}>
+              New Movie
+            </button>
             <p>Currently showing {count} movies from the database</p>
             <MoviesTable
               moviesToShow={moviesToShow}

@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import Likes from "./likes";
+import { Link } from "react-router-dom";
 
 class MoviesTable extends Component {
   render() {
@@ -19,14 +20,16 @@ class MoviesTable extends Component {
         <tbody>
           {moviesToShow.map((item) => (
             <tr key={item._id}>
-              <td>{item.title}</td>
+              <td>
+                <Link to={"/movies/" + item._id}>{item.title}</Link>
+              </td>
               <td>{item.genre.name}</td>
               <td>{item.numberInStock}</td>
               <td>{item.dailyRentalRate}</td>
               <td>
                 <Likes
                   id={item._id}
-                  likeState={item.handleLike}
+                  likeState={item.likedState}
                   onLiked={onLike}
                 />
               </td>
