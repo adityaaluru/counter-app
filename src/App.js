@@ -10,8 +10,16 @@ import NotFound from "./components/notFound";
 import LoginForm from "./components/loginForm";
 import RegisterUserForm from "./components/registerUserForm";
 import MovieForm from "./components/movieForm";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+import http from "./services/httpService";
 
 class App extends Component {
+  async componentDidMount() {
+    let response = await http.get("http://localhost:3000/api/movies/");
+    console.log(response);
+  }
   render() {
     return (
       <React.Fragment>
@@ -28,6 +36,7 @@ class App extends Component {
             <Redirect from="/" exact to="/movies" />
             <Redirect to="/not-found" />
           </Switch>
+          <ToastContainer position="bottom-right" />
         </main>
       </React.Fragment>
     );

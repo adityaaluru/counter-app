@@ -10,6 +10,7 @@ import {
 } from "../services/fakeMovieService";
 import { getGenres } from "../services/fakeGenreService";
 import { getItemsInPage } from "../utils/pagination";
+import SearchBox from "./form/searchbox";
 
 class Movies extends Component {
   state = {
@@ -17,6 +18,7 @@ class Movies extends Component {
     pageSize: 4,
     selectedPage: 1,
     selectedGenre: "all",
+    searchString: "",
     genres: [],
   };
 
@@ -49,28 +51,40 @@ class Movies extends Component {
   };
 
   handleSelectGenre = (genreId) => {
-    this.setState({ selectedGenre: genreId, selectedPage: 1 });
+    this.setState({
+      selectedGenre: genreId,
+      searchString: "",
+      selectedPage: 1,
+    });
   };
 
   handleNewMovie = () => {
     this.props.history.push("/movies/new");
   };
+  handleSearch = (searchString) => {
+    this.setState({ searchString, selectedGenre: "all", selectedPage: 1 });
+  };
 
-  filterMovies = (movies, genreId) => {
+  filterMovies = (movies, genreId, searchString) => {
+    let result = {};
     if (genreId === "all") {
-      return movies;
+      result = movies;
     } else {
-      const filteredMovies = movies.filter(
-        (movie) => movie.genre._id === genreId
-      );
-      return filteredMovies;
+      result = movies.filter((movie) => movie.genre._id === genreId);
     }
+    if (searchString !== "") {
+      result = result.filter((movie) =>
+        movie.title.toLowerCase().startsWith(searchString.toLowerCase())
+      );
+    }
+    return result;
   };
 
   render() {
     const filteredMovies = this.filterMovies(
       this.state.movies,
-      this.state.selectedGenre
+      this.state.selectedGenre,
+      this.state.searchString
     );
     const count = filteredMovies.length;
     let selectedPage = this.state.selectedPage;
@@ -80,9 +94,6 @@ class Movies extends Component {
       selectedPage
     );
 
-    if (count === 0) {
-      return <p>There are no movies at this time!</p>;
-    }
     return (
       <React.Fragment>
         <div className="row">
@@ -97,7 +108,15 @@ class Movies extends Component {
             <button className="btn btn-primary" onClick={this.handleNewMovie}>
               New Movie
             </button>
-            <p>Currently showing {count} movies from the database</p>
+            {count === 0 ? (
+              <p>There are no movies for the selected criteria!</p>
+            ) : (
+              <p>Currently showing {count} movies from the database</p>
+            )}
+            <SearchBox
+              value={this.state.searchString}
+              onChange={this.handleSearch}
+            />
             <MoviesTable
               moviesToShow={moviesToShow}
               onDelete={this.handleDelete}
