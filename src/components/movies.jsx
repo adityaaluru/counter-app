@@ -7,8 +7,8 @@ import {
   deleteMovie,
   getMovies,
   saveMovie,
-} from "../services/fakeMovieService";
-import { getGenres } from "../services/fakeGenreService";
+} from "../services/movieService";
+import { getGenres } from "../services/genreService";
 import { getItemsInPage } from "../utils/pagination";
 import SearchBox from "./form/searchbox";
 
@@ -24,26 +24,30 @@ class Movies extends Component {
 
   // Lifecycle methods
 
-  componentDidMount() {
-    const genres = [{ _id: "all", name: "All Genres" }, ...getGenres()];
-    this.setState({ movies: getMovies(), genres });
+  async componentDidMount() {
+    const allGenres = await getGenres();
+    const movies = await getMovies();
+    const genres = [{ _id: "all", name: "All Genres" }, ...allGenres];
+    this.setState({ movies, genres });
   }
 
   // Event handlers
 
-  handleDelete = (movie) => {
-    deleteMovie(movie._id);
-    this.setState({ movies: getMovies() });
+  handleDelete = async (movie) => {
+    await deleteMovie(movie._id);
+    const movies = await getMovies();
+    this.setState({ movies });
   };
 
-  handleLike = (movieID) => {
+  handleLike = async (movieID) => {
     const movie = this.state.movies.find((m) => m._id === movieID);
 
     if (movie.likedState) movie.likedState = false;
     else movie.likedState = true;
-    saveMovie(movie);
+    await saveMovie(movie);
+    const movies = await getMovies();
 
-    this.setState({ movies: getMovies() });
+    this.setState({ movies });
   };
 
   handlePageChange = (pageId) => {

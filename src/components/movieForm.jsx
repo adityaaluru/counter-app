@@ -5,8 +5,8 @@ import FormInput from "./form/input";
 import BaseForm from "./form/baseForm";
 import FormInputDropdown from "./form/inputDropdown";
 
-import { getMovie, saveMovie } from "../services/fakeMovieService";
-import { getGenres } from "../services/fakeGenreService";
+import { getMovie, saveMovie } from "../services/movieService";
+import { getGenres } from "../services/genreService";
 
 class MovieForm extends BaseForm {
   schema = {
@@ -21,7 +21,7 @@ class MovieForm extends BaseForm {
 
     this.state = {};
     this.state.errors = {};
-    this.state.genres = [{ _id: "00000", name: "" }, ...getGenres()];
+    this.state.genres = [];
     this.state.data = {
       id: "",
       title: "",
@@ -32,11 +32,18 @@ class MovieForm extends BaseForm {
     };
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    //Set the list of available genres
+
+    let remoteGenres = await getGenres();
+    let genres = [{ _id: "00000", name: "" }, ...remoteGenres];
+
+    // Pre-fill the form if the movieId is sent
+
     let data = {};
     const movieId = this.props.match.params.id;
     if (movieId !== "new" && movieId) {
-      const movieData = getMovie(movieId);
+      const movieData = await getMovie(movieId);
       data = {
         id: movieData._id,
         title: movieData.title,
@@ -45,13 +52,16 @@ class MovieForm extends BaseForm {
         rate: movieData.dailyRentalRate,
         likedState: movieData.likedState,
       };
-      this.setState({ data });
+      this.setState({ genres, data });
+    }
+    else {
+      this.setState({genres});
     }
   }
 
   // doSubmit to be called by handleSubmit() method in the base form
 
-  doSubmit = () => {
+  doSubmit = async () => {
     const { data } = { ...this.state };
     let movie = {};
     movie.title = data.title;
@@ -61,7 +71,7 @@ class MovieForm extends BaseForm {
     movie._id = data.id;
     movie.likedState = data.likedState;
 
-    saveMovie(movie);
+    await saveMovie(movie);
     this.props.history.push("/movies");
   };
 

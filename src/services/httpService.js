@@ -4,7 +4,6 @@ import { toast } from "react-toastify";
 axios.interceptors.response.use(
   (response) => {
     console.log("RESPONSE status", response.status);
-    toast.success("Success");
     return response;
   },
   (error) => {
@@ -13,9 +12,11 @@ axios.interceptors.response.use(
   }
 );
 
-export default {
+const http = {
   get: axios.get,
   post: axios.post,
   put: axios.put,
   delete: axios.delete,
 };
+
+export default http;
