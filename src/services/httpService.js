@@ -3,12 +3,12 @@ import { toast } from "react-toastify";
 
 axios.interceptors.response.use(
   (response) => {
-    console.log("RESPONSE status", response.status);
+    console.log(response.config.method," ",response.config.url," status:", response.status);
     return response;
   },
   (error) => {
-    toast.error("Error calling remote service...");
-    console.log("RESPONSE interceptor called!", error);
+    toast.error(error.response.data.error);
+    console.log("Error from remote service: ", error.message,error.response.data);
   }
 );
 

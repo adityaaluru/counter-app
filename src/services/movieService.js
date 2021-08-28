@@ -6,15 +6,19 @@ export async function getMovies() {
 }
 
 export async function getMovie(id) {
-  const movie = await http.get(process.env.REACT_APP_REMOTE_URL + "/api/movies/"+id);
-  return movie.data;
+  try{
+    const movie = await http.get(process.env.REACT_APP_REMOTE_URL + "/api/movies/"+id);
+    return movie.data;
+  }catch (err) {
+    return null;
+  }
 }
 
 export async function saveMovie(movie) {
 
   let movieInDb = {};
   if(movie._id){
-    movieInDb = await http.get(process.env.REACT_APP_REMOTE_URL + "/api/movies/"+movie._id);
+    movieInDb = (await http.get(process.env.REACT_APP_REMOTE_URL + "/api/movies/"+movie._id)).data;
   }
 
   movieInDb.title = movie.title;

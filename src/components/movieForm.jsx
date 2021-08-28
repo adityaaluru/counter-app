@@ -44,15 +44,20 @@ class MovieForm extends BaseForm {
     const movieId = this.props.match.params.id;
     if (movieId !== "new" && movieId) {
       const movieData = await getMovie(movieId);
-      data = {
-        id: movieData._id,
-        title: movieData.title,
-        genre: movieData.genre.name,
-        qtyInStock: movieData.numberInStock,
-        rate: movieData.dailyRentalRate,
-        likedState: movieData.likedState,
-      };
-      this.setState({ genres, data });
+      if(movieData){
+        data = {
+          id: movieData._id,
+          title: movieData.title,
+          genre: movieData.genre.name,
+          qtyInStock: movieData.numberInStock,
+          rate: movieData.dailyRentalRate,
+          likedState: movieData.likedState,
+        };
+        this.setState({ genres, data });
+      }
+      else {
+        this.props.history.replace("/not-found");
+      }
     }
     else {
       this.setState({genres});
@@ -62,7 +67,7 @@ class MovieForm extends BaseForm {
   // doSubmit to be called by handleSubmit() method in the base form
 
   doSubmit = async () => {
-    const { data } = { ...this.state };
+    const { data } = this.state;
     let movie = {};
     movie.title = data.title;
     movie.genre = this.state.genres.find((item) => data.genre === item.name);
@@ -70,7 +75,7 @@ class MovieForm extends BaseForm {
     movie.dailyRentalRate = Number(data.rate);
     movie._id = data.id;
     movie.likedState = data.likedState;
-
+    console.log("Movie: ",movie);
     await saveMovie(movie);
     this.props.history.push("/movies");
   };

@@ -13,13 +13,7 @@ import MovieForm from "./components/movieForm";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import http from "./services/httpService";
-
 class App extends Component {
-  async componentDidMount() {
-    let response = await http.get("http://localhost:3000/api/movies/");
-    console.log(response);
-  }
   render() {
     return (
       <React.Fragment>

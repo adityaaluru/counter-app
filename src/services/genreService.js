@@ -1,4 +1,3 @@
-import { toast } from "react-toastify";
 import http from "./httpService";
 
 export async function getGenres() {
